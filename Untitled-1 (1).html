@@ -1,0 +1,2676 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Menú Semanal Mexicano</title>
+    <script src="/_sdk/element_sdk.js"></script>
+    <script src="/_sdk/data_sdk.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+        body {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            color: #1e293b;
+            min-height: 100%;
+        }
+
+        .font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .day-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .day-btn {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: capitalize;
+        }
+
+        .day-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+        }
+
+        .day-btn.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .meal-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .meal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #10b981;
+            text-align: center;
+        }
+
+        .dishes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .dish-card {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .dish-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            border-color: #06b6d4;
+        }
+
+        .dish-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        .dish-description {
+            color: #64748b;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .dish-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .calorie-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+
+
+        .special-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .emoji {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .cart-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .cart-button:hover {
+            transform: scale(1.1);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+            color: #92400e;
+            border: 2px solid #fbbf24;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .qty-btn {
+            background: #06b6d4;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .whatsapp-btn {
+            background: #25d366;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-btn:hover {
+            background: #20ba5a;
+            transform: translateY(-2px);
+        }
+    </style>
+    <style>
+        @view-transition {
+            navigation: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="font-playfair text-5xl font-bold mb-4" id="restaurant-name">Chef Franko at Verano Estate</h1>
+            <p class="text-xl opacity-90" id="restaurant-subtitle">Authentic Mexican Cuisine</p>
+            <p class="text-lg mt-2 opacity-75">Buffet • Lunch • Dinner</p>
+        </header>
+        <div class="language-toggle" style="position: absolute; top: 2rem; right: 2rem; z-index: 100;"><button
+                id="language-btn"
+                style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                🇪🇸 Switch to Spanish </button>
+        </div>
+        <div class="day-selector"><button class="day-btn active" data-day="lunes">Monday</button> <button
+                class="day-btn" data-day="martes">Tuesday</button> <button class="day-btn"
+                data-day="miercoles">Wednesday</button> <button class="day-btn" data-day="jueves">Thursday</button>
+            <button class="day-btn" data-day="viernes">Friday</button> <button class="day-btn"
+                data-day="sabado">Saturday</button> <button class="day-btn" data-day="domingo">Sunday</button>
+        </div><!-- LUNES -->
+        <div class="day-content" data-day="lunes"><!-- Buffet Lunes -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🍽️ Morning Buffet (7:00 AM - 11:00 AM)</h2>
+                <div
+                    style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #f59e0b;">
+                    <h3 style="color: #92400e; font-weight: 700; margin-bottom: 1rem; text-align: center;">ℹ️ Buffet
+                        Information</h3>
+                    <p style="color: #92400e; text-align: center; line-height: 1.6;"><strong>Breakfast is served
+                            with:</strong> Bacon, Sausages, Chilaquiles or Home Made Potatoes<br><strong>You can
+                            choose:</strong> Huevos Rancheros or Eggs Benedict</p>
+                </div>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            ⭐
+                        </div>
+                        <div class="dish-name">
+                            Chilaquiles Rojos 🌶️🥛
+                        </div>
+                        <div class="dish-description">
+                            Crispy corn tortillas bathed in spicy red sauce, cream, fresh cheese and onion. Served with
+                            refried beans.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Chilaquiles Rojos', 'Crispy corn tortillas bathed in spicy red sauce, cream, fresh cheese and onion. Served with refried beans.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Huevos Benedictinos 🥚🌾🥛
+                        </div>
+                        <div class="dish-description">
+                            Poached eggs on English muffin with Canadian ham, topped with hollandaise sauce. Served with
+                            home made potatoes.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Huevos Benedictinos', 'Poached eggs on English muffin with Canadian ham, topped with hollandaise sauce. Served with home made potatoes.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Tamales de Dulce 🌾
+                        </div>
+                        <div class="dish-description">
+                            Pink tamales with raisins and pineapple, sweet masa wrapped in corn husk. Served with café
+                            de olla.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Tamales de Dulce', 'Pink tamales with raisins and pineapple, sweet masa wrapped in corn husk. Served with café de olla.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Frijoles Charros 🥓
+                        </div>
+                        <div class="dish-description">
+                            Pinto beans cooked with bacon, chorizo, tomato, onion and cilantro.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Frijoles Charros', 'Pinto beans cooked with bacon, chorizo, tomato, onion and cilantro.')">
+                            🛒 Add to Order </button>
+                    </div>
+                </div>
+            </div><!-- Almuerzo Lunes -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌮 Lunch (12:00 PM - 4:00 PM)</h2>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            🔥
+                        </div>
+                        <div class="dish-name">
+                            Pozole Rojo 🌶️
+                        </div>
+                        <div class="dish-description">
+                            Traditional soup with hominy corn, pork meat, guajillo chile. Served with lettuce, radishes,
+                            oregano and lime.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">520 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Pozole Rojo', 'Traditional soup with hominy corn, pork meat, guajillo chile. Served with lettuce, radishes, oregano and lime.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Tacos al Pastor 🌶️
+                        </div>
+                        <div class="dish-description">
+                            Pork marinated with achiote, grilled on a trompo with pineapple, onion and cilantro on corn
+                            tortilla.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Tacos al Pastor', 'Pork marinated with achiote, grilled on a trompo with pineapple, onion and cilantro on corn tortilla.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Quesadillas de Flor de Calabaza 🥛🌱
+                        </div>
+                        <div class="dish-description">
+                            Corn tortillas filled with squash blossoms, epazote and Oaxaca cheese. With green salsa.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">340 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Quesadillas de Flor de Calabaza', 'Corn tortillas filled with squash blossoms, epazote and Oaxaca cheese. With green salsa.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Guacamole con Totopos 🌶️🌱
+                        </div>
+                        <div class="dish-description">
+                            Fresh avocado mashed with tomato, onion, cilantro and serrano chile. Served with tortilla
+                            chips.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Guacamole con Totopos', 'Fresh avocado mashed with tomato, onion, cilantro and serrano chile. Served with tortilla chips.')">
+                            🛒 Add to Order </button>
+                    </div>
+                </div>
+            </div><!-- Cena Lunes -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌙 Dinner</h2><!-- Entradas -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🥗 Appetizers</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Guacamole Tradicional 🌶️🌱
+                            </div>
+                            <div class="dish-description">
+                                Fresh avocado with tomato, onion, cilantro and serrano chile. Served with artisanal
+                                tortilla chips.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Guacamole Tradicional', 'Fresh avocado with tomato, onion, cilantro and serrano chile. Served with artisanal tortilla chips.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Sopa de Tortilla 🥛🌶️
+                            </div>
+                            <div class="dish-description">
+                                Tomato broth with fried tortilla strips, avocado, fresh cheese and pasilla chile.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Sopa de Tortilla', 'Tomato broth with fried tortilla strips, avocado, fresh cheese and pasilla chile.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Nachos con Queso 🥛🌶️
+                            </div>
+                            <div class="dish-description">
+                                Crispy tortilla chips with melted cheese, jalapeños, refried beans and pico de gallo.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Nachos con Queso', 'Crispy tortilla chips with melted cheese, jalapeños, refried beans and pico de gallo.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Quesadillas de Queso 🥛🌾
+                            </div>
+                            <div class="dish-description">
+                                Flour tortillas with melted Oaxaca cheese, served with cream and green salsa.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Quesadillas de Queso', 'Flour tortillas with melted Oaxaca cheese, served with cream and green salsa.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Elotes Callejeros 🥛🥚🌶️
+                            </div>
+                            <div class="dish-description">
+                                Grilled corn with mayonnaise, cotija cheese, chili powder and lime, street style.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Elotes Callejeros', 'Grilled corn with mayonnaise, cotija cheese, chili powder and lime, street style.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Platos Fuertes -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍖 Main Courses</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card" style="position: relative;">
+                            <div class="special-badge">
+                                👑
+                            </div>
+                            <div class="dish-name">
+                                Mole Poblano 🌶️🥜
+                            </div>
+                            <div class="dish-description">
+                                Chicken in mole sauce with over 20 ingredients, chocolate, chiles and spices. Served
+                                with red rice and tortillas.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">680 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Mole Poblano', 'Chicken in mole sauce with over 20 ingredients, chocolate, chiles and spices. Served with red rice and tortillas.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Pescado a la Veracruzana 🐟🌶️
+                            </div>
+                            <div class="dish-description">
+                                Red snapper in tomato sauce with olives, capers, jalapeño chiles and aromatic herbs.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">450 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Pescado a la Veracruzana', 'Red snapper in tomato sauce with olives, capers, jalapeño chiles and aromatic herbs.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Chiles en Nogada 🥜🥛🌶️
+                            </div>
+                            <div class="dish-description">
+                                Poblano chiles stuffed with picadillo, topped with walnut cream sauce and decorated with
+                                pomegranate.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">520 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Chiles en Nogada', 'Poblano chiles stuffed with picadillo, topped with walnut cream sauce and decorated with pomegranate.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Postres -->
+                <div>
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍰 Desserts</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Flan Napolitano 🥛🥚
+                            </div>
+                            <div class="dish-description">
+                                Postre cremoso de vainilla con caramelo líquido y frutos rojos frescos.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Flan Napolitano', 'Creamy vanilla dessert with liquid caramel and fresh red berries.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Churros con Cajeta 🥛🌾
+                            </div>
+                            <div class="dish-description">
+                                Freshly fried churros dusted with sugar and cinnamon, served with warm cajeta.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Churros con Cajeta', 'Freshly fried churros dusted with sugar and cinnamon, served with warm cajeta.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- MARTES -->
+        <div class="day-content hidden" data-day="martes"><!-- Buffet Martes -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🍽️ Morning Buffet (7:00 AM - 11:00 AM)</h2>
+                <div
+                    style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #f59e0b;">
+                    <h3 style="color: #92400e; font-weight: 700; margin-bottom: 1rem; text-align: center;">ℹ️ Buffet
+                        Information</h3>
+                    <p style="color: #92400e; text-align: center; line-height: 1.6;"><strong>Breakfast is served
+                            with:</strong> Bacon, Sausages, Chilaquiles or Home Made Potatoes<br><strong>You can
+                            choose:</strong> Huevos Rancheros or Eggs Benedict</p>
+                </div>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            ⭐
+                        </div>
+                        <div class="dish-name">
+                            Molletes
+                        </div>
+                        <div class="dish-description">
+                            Toasted bolillo bread with refried beans, melted cheese and pico de gallo. Served with
+                            avocado.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Molletes', 'Toasted bolillo bread with refried beans, melted cheese and pico de gallo. Served with avocado.')">
+                            🛒 Agregar al Pedido </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Enchiladas Verdes
+                        </div>
+                        <div class="dish-description">
+                            Chicken-filled tortillas bathed in green tomatillo sauce, cream and fresh cheese.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Enchiladas Verdes', 'Chicken-filled tortillas bathed in green tomatillo sauce, cream and fresh cheese.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Nopales Asados
+                        </div>
+                        <div class="dish-description">
+                            Tender grilled cactus paddles with onion, tomato and panela cheese. Seasoned with salt and
+                            lime.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">180 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Nopales Asados', 'Tender grilled cactus paddles with onion, tomato and panela cheese. Seasoned with salt and lime.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Pan Dulce Variado
+                        </div>
+                        <div class="dish-description">
+                            Selection of conchas, cuernitos and orejas freshly baked from traditional bakery.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Pan Dulce Variado', 'Selection of conchas, cuernitos and orejas freshly baked from traditional bakery.')">
+                            🛒 Add to Order </button>
+                    </div>
+                </div>
+            </div><!-- Almuerzo Martes -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌮 Lunch (12:00 PM - 4:00 PM)</h2>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            🔥
+                        </div>
+                        <div class="dish-name">
+                            Cochinita Pibil
+                        </div>
+                        <div class="dish-description">
+                            Pork marinated in achiote and sour orange, cooked in banana leaf. With pickled purple onion.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">580 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Cochinita Pibil', 'Pork marinated in achiote and sour orange, cooked in banana leaf. With pickled purple onion.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Sopa de Tortilla
+                        </div>
+                        <div class="dish-description">
+                            Tomato broth with fried tortilla strips, avocado, fresh cheese, cream and pasilla chile.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Sopa de Tortilla', 'Tomato broth with fried tortilla strips, avocado, fresh cheese, cream and pasilla chile.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Tostadas de Tinga
+                        </div>
+                        <div class="dish-description">
+                            Crispy tostadas with shredded chicken in chipotle sauce, lettuce, cream and cheese.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Tostadas de Tinga', 'Crispy tostadas with shredded chicken in chipotle sauce, lettuce, cream and cheese.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Pico de Gallo
+                        </div>
+                        <div class="dish-description">
+                            Fresh mix of tomato, onion, cilantro, serrano chile and lime. Perfect accompaniment.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">45 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Pico de Gallo', 'Fresh mix of tomato, onion, cilantro, serrano chile and lime. Perfect accompaniment.')">
+                            🛒 Add to Order </button>
+                    </div>
+                </div>
+            </div><!-- Cena Martes -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌙 Dinner</h2><!-- Entradas -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🥗 Appetizers</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Ceviche de Camarón
+                            </div>
+                            <div class="dish-description">
+                                Fresh shrimp marinated in lime with tomato, onion, cilantro and serrano chile.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">220 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Ceviche de Camarón', 'Fresh shrimp marinated in lime with tomato, onion, cilantro and serrano chile.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Caldo Tlalpeño
+                            </div>
+                            <div class="dish-description">
+                                Soup with chicken, chickpeas, green beans, carrot, chipotle and avocado. Served with
+                                rice.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Caldo Tlalpeño', 'Soup with chicken, chickpeas, green beans, carrot, chipotle and avocado. Served with rice.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Platos Fuertes -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍖 Main Courses</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card" style="position: relative;">
+                            <div class="special-badge">
+                                👑
+                            </div>
+                            <div class="dish-name">
+                                Carnitas Michoacanas
+                            </div>
+                            <div class="dish-description">
+                                Pork confit in its own fat, golden and crispy. Served with tortillas, green salsa and
+                                guacamole.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">620 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Carnitas Michoacanas', 'Pork confit in its own fat, golden and crispy. Served with tortillas, green salsa and guacamole.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Flautas de Pollo
+                            </div>
+                            <div class="dish-description">
+                                Golden tacos filled with shredded chicken, served with green salsa, cream and lettuce.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">450 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Flautas de Pollo', 'Golden tacos filled with shredded chicken, served with green salsa, cream and lettuce.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Enchiladas Rojas
+                            </div>
+                            <div class="dish-description">
+                                Tortillas filled with fresh cheese bathed in red guajillo chile sauce with cream and
+                                onion.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Enchiladas Rojas', 'Tortillas filled with fresh cheese bathed in red guajillo chile sauce with cream and onion.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Postres -->
+                <div>
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍰 Desserts</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Tres Leches
+                            </div>
+                            <div class="dish-description">
+                                Spongy cake soaked in three types of milk, topped with meringue and cinnamon.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Tres Leches', 'Spongy cake soaked in three types of milk, topped with meringue and cinnamon.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Gelatina de Leche
+                            </div>
+                            <div class="dish-description">
+                                Creamy condensed milk gelatin with red berries and whipped cream.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Gelatina de Leche', 'Creamy condensed milk gelatin with red berries and whipped cream.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- MIÉRCOLES -->
+        <div class="day-content hidden" data-day="miercoles"><!-- Buffet Miércoles -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🍽️ Morning Buffet (7:00 AM - 11:00 AM)</h2>
+                <div
+                    style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #f59e0b;">
+                    <h3 style="color: #92400e; font-weight: 700; margin-bottom: 1rem; text-align: center;">ℹ️ Buffet
+                        Information</h3>
+                    <p style="color: #92400e; text-align: center; line-height: 1.6;"><strong>Breakfast is served
+                            with:</strong> Bacon, Sausages, Chilaquiles or Home Made Potatoes<br><strong>You can
+                            choose:</strong> Huevos Rancheros or Eggs Benedict</p>
+                </div>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            ⭐
+                        </div>
+                        <div class="dish-name">
+                            Machaca con Huevos
+                        </div>
+                        <div class="dish-description">
+                            Shredded dried beef sautéed with scrambled eggs, tomato, onion and serrano chile.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">480 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Machaca con Huevos', 'Shredded dried beef sautéed with scrambled eggs, tomato, onion and serrano chile.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Quesadillas de Huitlacoche
+                        </div>
+                        <div class="dish-description">
+                            Tortillas filled with corn fungus, epazote and Oaxaca cheese. Served with red salsa.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">360 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Quesadillas de Huitlacoche', 'Tortillas filled with corn fungus, epazote and Oaxaca cheese. Served with red salsa.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Elote Desgranado
+                        </div>
+                        <div class="dish-description">
+                            Corn kernels cooked with epazote, served with mayonnaise, cotija cheese and chili powder.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Elote Desgranado', 'Corn kernels cooked with epazote, served with mayonnaise, cotija cheese and chili powder.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Churros
+                        </div>
+                        <div class="dish-description">
+                            Fried dough dusted with sugar and cinnamon, served with cajeta and chocolate for dipping.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Churros', 'Fried dough dusted with sugar and cinnamon, served with cajeta and chocolate for dipping.')">
+                            🛒 Add to Order </button>
+                    </div>
+                </div>
+            </div><!-- Almuerzo Miércoles -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌮 Lunch (12:00 PM - 4:00 PM)</h2>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            🔥
+                        </div>
+                        <div class="dish-name">
+                            Mole Verde
+                        </div>
+                        <div class="dish-description">
+                            Chicken in green sauce made with pumpkin seeds, tomatillos, cilantro and green chiles. With
+                            white rice.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">520 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Mole Verde', 'Chicken in green sauce made with pumpkin seeds, tomatillos, cilantro and green chiles. With white rice.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Tacos de Carnitas
+                        </div>
+                        <div class="dish-description">
+                            Corn tortillas with golden carnitas, onion, cilantro and spicy green salsa.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Tacos de Carnitas', 'Corn tortillas with golden carnitas, onion, cilantro and spicy green salsa.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Esquites
+                        </div>
+                        <div class="dish-description">
+                            Cooked corn kernels with mayonnaise, cotija cheese, chili powder and lime.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Esquites', 'Cooked corn kernels with mayonnaise, cotija cheese, chili powder and lime.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Rajas con Crema
+                        </div>
+                        <div class="dish-description">
+                            Roasted poblano chile strips with cream, onion and corn kernels.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">240 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Rajas con Crema', 'Roasted poblano chile strips with cream, onion and corn kernels.')">
+                            🛒 Add to Order </button>
+                    </div>
+                </div>
+            </div><!-- Cena Miércoles -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌙 Dinner</h2><!-- Entradas -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🥗 Appetizers</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Crema de Elote
+                            </div>
+                            <div class="dish-description">
+                                Creamy tender corn soup with epazote, poblano chile and crumbled fresh cheese.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Crema de Elote', 'Creamy tender corn soup with epazote, poblano chile and crumbled fresh cheese.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Ensalada de Nopales
+                            </div>
+                            <div class="dish-description">
+                                Tender cactus paddles with tomato, red onion, cilantro, panela cheese and lime
+                                vinaigrette.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">180 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Ensalada de Nopales', 'Tender cactus paddles with tomato, red onion, cilantro, panela cheese and lime vinaigrette.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Platos Fuertes -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍖 Main Courses</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card" style="position: relative;">
+                            <div class="special-badge">
+                                👑
+                            </div>
+                            <div class="dish-name">
+                                Barbacoa de Borrego
+                            </div>
+                            <div class="dish-description">
+                                Lamb slowly cooked in maguey leaves, served with consommé, tortillas and assorted
+                                salsas.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">680 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Barbacoa de Borrego', 'Lamb slowly cooked in maguey leaves, served with consommé, tortillas and assorted salsas.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Chiles Rellenos
+                            </div>
+                            <div class="dish-description">
+                                Poblano chiles stuffed with cheese, battered in egg and bathed in tomato sauce.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">480 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Chiles Rellenos', 'Poblano chiles stuffed with cheese, battered in egg and bathed in tomato sauce.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Sopes
+                            </div>
+                            <div class="dish-description">
+                                Thick tortillas with beans, lettuce, cream, fresh cheese and red salsa.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Sopes', 'Thick tortillas with beans, lettuce, cream, fresh cheese and red salsa.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Postres -->
+                <div>
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍰 Desserts</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Arroz con Leche
+                            </div>
+                            <div class="dish-description">
+                                Creamy rice pudding cooked in milk with cinnamon, vanilla and raisins.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Arroz con Leche', 'Creamy rice pudding cooked in milk with cinnamon, vanilla and raisins.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Chongos Zamoranos
+                            </div>
+                            <div class="dish-description">
+                                Traditional dessert of curdled milk with cinnamon and piloncillo syrup.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Chongos Zamoranos', 'Traditional dessert of curdled milk with cinnamon and piloncillo syrup.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- JUEVES -->
+        <div class="day-content hidden" data-day="jueves"><!-- Buffet Jueves -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🍽️ Morning Buffet (7:00 AM - 11:00 AM)</h2>
+                <div
+                    style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #f59e0b;">
+                    <h3 style="color: #92400e; font-weight: 700; margin-bottom: 1rem; text-align: center;">ℹ️ Buffet
+                        Information</h3>
+                    <p style="color: #92400e; text-align: center; line-height: 1.6;"><strong>Breakfast is served
+                            with:</strong> Bacon, Sausages, Chilaquiles or Home Made Potatoes<br><strong>You can
+                            choose:</strong> Huevos Rancheros or Eggs Benedict</p>
+                </div>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            ⭐
+                        </div>
+                        <div class="dish-name">
+                            Migas
+                        </div>
+                        <div class="dish-description">
+                            Fried tortillas mixed with scrambled eggs, serrano chile, tomato and onion. With beans.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Migas', 'Fried tortillas mixed with scrambled eggs, serrano chile, tomato and onion. With beans.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Tamales Oaxaqueños
+                        </div>
+                        <div class="dish-description">
+                            Tamales wrapped in banana leaf, filled with coloradito mole and chicken.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Tamales Oaxaqueños', 'Tamales wrapped in banana leaf, filled with coloradito mole and chicken.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Quelites Guisados
+                        </div>
+                        <div class="dish-description">
+                            Purslane and lamb's quarters sautéed with tomato, onion and serrano chile.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">160 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Quelites Guisados', 'Purslane and lamb\'s quarters sautéed with tomato, onion and serrano chile.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Empanadas de Dulce
+                        </div>
+                        <div class="dish-description">
+                            Sweet empanadas filled with dulce de leche, dusted with powdered sugar.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Empanadas de Dulce', 'Sweet empanadas filled with dulce de leche, dusted with powdered sugar.')">
+                            🛒 Add to Order </button>
+                    </div>
+                </div>
+            </div><!-- Almuerzo Jueves -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌮 Lunch (12:00 PM - 4:00 PM)</h2>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            🔥
+                        </div>
+                        <div class="dish-name">
+                            Birria de Res
+                        </div>
+                        <div class="dish-description">
+                            Beef stewed in red chile sauce, served with onion, cilantro and consommé.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">620 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Birria de Res', 'Beef stewed in red chile sauce, served with onion, cilantro and consommé.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Gorditas de Chicharrón
+                        </div>
+                        <div class="dish-description">
+                            Corn masa filled with pressed pork rinds, lettuce, cream and green salsa.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">480 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Gorditas de Chicharrón', 'Corn masa filled with pressed pork rinds, lettuce, cream and green salsa.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Ceviche de Pescado
+                        </div>
+                        <div class="dish-description">
+                            Fresh fish marinated in lime with tomato, onion, cilantro and serrano chile.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">220 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Ceviche de Pescado', 'Fresh fish marinated in lime with tomato, onion, cilantro and serrano chile.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Frijoles Refritos
+                        </div>
+                        <div class="dish-description">
+                            Pinto beans refried with lard, onion and crumbled fresh cheese.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Frijoles Refritos', 'Pinto beans refried with lard, onion and crumbled fresh cheese.')">
+                            🛒 Add to Order </button>
+                    </div>
+                </div>
+            </div><!-- Cena Jueves -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌙 Dinner</h2><!-- Entradas -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🥗 Appetizers</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Consomé de Pollo
+                            </div>
+                            <div class="dish-description">
+                                Clear chicken broth with vegetables, chickpeas and rice. Served with lime and chili
+                                powder.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">180 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Consomé de Pollo', 'Clear chicken broth with vegetables, chickpeas and rice. Served with lime and chili powder.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Camarones al Mojo de Ajo
+                            </div>
+                            <div class="dish-description">
+                                Large shrimp sautéed in olive oil with garlic, guajillo chile and parsley.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Camarones al Mojo de Ajo', 'Large shrimp sautéed in olive oil with garlic, guajillo chile and parsley.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Platos Fuertes -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍖 Main Courses</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card" style="position: relative;">
+                            <div class="special-badge">
+                                👑
+                            </div>
+                            <div class="dish-name">
+                                Mole Negro Oaxaqueño
+                            </div>
+                            <div class="dish-description">
+                                The king of moles with over 30 ingredients, chicken and handmade tortillas.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">720 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Mole Negro Oaxaqueño', 'The king of moles with over 30 ingredients, chicken and handmade tortillas.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Enchiladas Rojas
+                            </div>
+                            <div class="dish-description">
+                                Tortillas filled with fresh cheese bathed in red guajillo chile sauce with cream and
+                                onion.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Enchiladas Rojas', 'Tortillas filled with fresh cheese bathed in red guajillo chile sauce with cream and onion.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Tacos de Pescado
+                            </div>
+                            <div class="dish-description">
+                                Breaded fish in corn tortillas with cabbage, pico de gallo and chipotle sauce.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Tacos de Pescado', 'Breaded fish in corn tortillas with cabbage, pico de gallo and chipotle sauce.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Postres -->
+                <div>
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍰 Desserts</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Buñuelos
+                            </div>
+                            <div class="dish-description">
+                                Crispy fried tortillas bathed in piloncillo honey with cinnamon.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Buñuelos', 'Crispy fried tortillas bathed in piloncillo honey with cinnamon.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Flan de Coco
+                            </div>
+                            <div class="dish-description">
+                                Creamy coconut flan with liquid caramel and toasted shredded coconut.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">340 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Flan de Coco', 'Creamy coconut flan with liquid caramel and toasted shredded coconut.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- VIERNES -->
+        <div class="day-content hidden" data-day="viernes"><!-- Buffet Viernes -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🍽️ Morning Buffet (7:00 AM - 11:00 AM)</h2>
+                <div
+                    style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #f59e0b;">
+                    <h3 style="color: #92400e; font-weight: 700; margin-bottom: 1rem; text-align: center;">ℹ️ Buffet
+                        Information</h3>
+                    <p style="color: #92400e; text-align: center; line-height: 1.6;"><strong>Breakfast is served
+                            with:</strong> Bacon, Sausages, Chilaquiles or Home Made Potatoes<br><strong>You can
+                            choose:</strong> Huevos Rancheros or Eggs Benedict</p>
+                </div>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            ⭐
+                        </div>
+                        <div class="dish-name">
+                            Huevos Divorciados
+                        </div>
+                        <div class="dish-description">
+                            Two fried eggs separated by green and red salsa, with refried beans and tortillas.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">450 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Huevos Divorciados', 'Dos huevos estrellados separados por salsa verde y roja, con frijoles refritos y tortillas.')">
+                            🛒 Agregar al Pedido </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Chilaquiles Verdes
+                        </div>
+                        <div class="dish-description">
+                            Tortillas en salsa verde de tomatillo con crema, queso fresco y cebolla morada.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Chilaquiles Verdes', 'Tortillas en salsa verde de tomatillo con crema, queso fresco y cebolla morada.')">
+                            🛒 Agregar al Pedido </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Calabacitas con Elote
+                        </div>
+                        <div class="dish-description">
+                            Calabacitas tiernas salteadas con granos de elote, cebolla y epazote.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">200 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Calabacitas con Elote', 'Calabacitas tiernas salteadas con granos de elote, cebolla y epazote.')">
+                            🛒 Agregar al Pedido </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Conchas
+                        </div>
+                        <div class="dish-description">
+                            Pan dulce tradicional con cobertura de azúcar en forma de concha.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Conchas', 'Pan dulce tradicional con cobertura de azúcar en forma de concha.')">
+                            🛒 Agregar al Pedido </button>
+                    </div>
+                </div>
+            </div><!-- Almuerzo Viernes -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌮 Lunch (12:00 PM - 4:00 PM)</h2>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            🔥
+                        </div>
+                        <div class="dish-name">
+                            Pescado Zarandeado
+                        </div>
+                        <div class="dish-description">
+                            Pescado entero asado con salsa de chiles y especias, estilo Nayarit. Con tortillas y
+                            ensalada.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">520 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Pescado Zarandeado', 'Pescado entero asado con salsa de chiles y especias, estilo Nayarit. Con tortillas y ensalada.')">
+                            🛒 Agregar al Pedido </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Tacos de Pescado
+                        </div>
+                        <div class="dish-description">
+                            Pescado empanizado en tortillas de maíz con repollo, pico de gallo y salsa de chipotle.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Tacos de Pescado', 'Pescado empanizado en tortillas de maíz con repollo, pico de gallo y salsa de chipotle.')">
+                            🛒 Agregar al Pedido </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Aguachile Verde
+                        </div>
+                        <div class="dish-description">
+                            Camarones crudos marinados en limón con chile serrano, pepino y cebolla morada.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">180 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Aguachile Verde', 'Camarones crudos marinados en limón con chile serrano, pepino y cebolla morada.')">
+                            🛒 Agregar al Pedido </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Salsa Verde
+                        </div>
+                        <div class="dish-description">
+                            Salsa picante de tomatillo asado con chile serrano, ajo y cilantro.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">25 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Salsa Verde', 'Salsa picante de tomatillo asado con chile serrano, ajo y cilantro.')">
+                            🛒 Agregar al Pedido </button>
+                    </div>
+                </div>
+            </div><!-- Cena Viernes -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌙 Dinner</h2><!-- Entradas -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🥗 Appetizers</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Aguachile Rojo
+                            </div>
+                            <div class="dish-description">
+                                Camarones marinados en limón con chile chiltepin, pepino, cebolla morada y aguacate.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">200 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Aguachile Rojo', 'Camarones marinados en limón con chile chiltepin, pepino, cebolla morada y aguacate.')">
+                                🛒 Agregar al Pedido </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Molcajete de Mariscos
+                            </div>
+                            <div class="dish-description">
+                                Camarones, pulpo y pescado en salsa verde picante, servido en molcajete caliente.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">480 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Molcajete de Mariscos', 'Camarones, pulpo y pescado en salsa verde picante, servido en molcajete caliente.')">
+                                🛒 Agregar al Pedido </button>
+                        </div>
+                    </div>
+                </div><!-- Platos Fuertes -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍖 Main Courses</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card" style="position: relative;">
+                            <div class="special-badge">
+                                👑
+                            </div>
+                            <div class="dish-name">
+                                Parrillada Mexicana
+                            </div>
+                            <div class="dish-description">
+                                Selección de carnes asadas: arrachera, chorizo, pollo y nopales. Con guacamole y
+                                tortillas.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">780 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Parrillada Mexicana', 'Selección de carnes asadas: arrachera, chorizo, pollo y nopales. Con guacamole y tortillas.')">
+                                🛒 Agregar al Pedido </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Quesadillas de Camarón
+                            </div>
+                            <div class="dish-description">
+                                Tortillas de harina rellenas de camarones, queso Oaxaca y chile poblano.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Quesadillas de Camarón', 'Tortillas de harina rellenas de camarones, queso Oaxaca y chile poblano.')">
+                                🛒 Agregar al Pedido </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Tacos de Arrachera
+                            </div>
+                            <div class="dish-description">
+                                Carne de arrachera asada con cebolla, cilantro y salsa roja en tortillas de maíz.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">450 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Tacos de Arrachera', 'Carne de arrachera asada con cebolla, cilantro y salsa roja en tortillas de maíz.')">
+                                🛒 Agregar al Pedido </button>
+                        </div>
+                    </div>
+                </div><!-- Postres -->
+                <div>
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍰 Desserts</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Gelatina de Mosaico
+                            </div>
+                            <div class="dish-description">
+                                Postre colorido de gelatinas de diferentes sabores con leche condensada.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">220 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Gelatina de Mosaico', 'Postre colorido de gelatinas de diferentes sabores con leche condensada.')">
+                                🛒 Agregar al Pedido </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Paletas de Coco
+                            </div>
+                            <div class="dish-description">
+                                Paletas heladas de coco natural con trozos de coco fresco y leche condensada.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">180 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Paletas de Coco', 'Paletas heladas de coco natural con trozos de coco fresco y leche condensada.')">
+                                🛒 Agregar al Pedido </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- SÁBADO -->
+        <div class="day-content hidden" data-day="sabado"><!-- Buffet Sábado -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🍽️ Morning Buffet (7:00 AM - 11:00 AM)</h2>
+                <div
+                    style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #f59e0b;">
+                    <h3 style="color: #92400e; font-weight: 700; margin-bottom: 1rem; text-align: center;">ℹ️ Buffet
+                        Information</h3>
+                    <p style="color: #92400e; text-align: center; line-height: 1.6;"><strong>Breakfast is served
+                            with:</strong> Bacon, Sausages, Chilaquiles or Home Made Potatoes<br><strong>You can
+                            choose:</strong> Huevos Rancheros or Eggs Benedict</p>
+                </div>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            ⭐
+                        </div>
+                        <div class="dish-name">
+                            Menudo Rojo
+                        </div>
+                        <div class="dish-description">
+                            Sopa tradicional de pancita de res con chile rojo, servida con cebolla, orégano y limón.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Menudo Rojo', 'Traditional beef tripe soup with red chile, served with onion, oregano and lime.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Pancakes de Cajeta
+                        </div>
+                        <div class="dish-description">
+                            Hotcakes esponjosos bañados en cajeta casera con nueces y plátano.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">480 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Pancakes de Cajeta', 'Fluffy pancakes bathed in homemade cajeta with walnuts and banana.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Chiles Toreados
+                        </div>
+                        <div class="dish-description">
+                            Chiles jalapeños asados con cebolla, ajo y sal de grano.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">80 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Chiles Toreados', 'Roasted jalapeño chiles with onion, garlic and coarse salt.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Orejas
+                        </div>
+                        <div class="dish-description">
+                            Sweet bread in ear shape with sugar and cinnamon.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">280 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Orejas', 'Sweet bread in ear shape with sugar and cinnamon.')"> 🛒 Add
+                            to Order </button>
+                    </div>
+                </div>
+            </div><!-- Almuerzo Sábado -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌮 Lunch (12:00 PM - 4:00 PM)</h2>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            🔥
+                        </div>
+                        <div class="dish-name">
+                            Cabrito al Pastor
+                        </div>
+                        <div class="dish-description">
+                            Cabrito joven asado al estilo norteño con especias y hierbas aromáticas.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">680 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Cabrito al Pastor', 'Young goat roasted northern style with spices and aromatic herbs.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Tacos de Suadero
+                        </div>
+                        <div class="dish-description">
+                            Suadero meat golden in its fat with onion, cilantro and green salsa.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">450 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Tacos de Suadero', 'Suadero meat golden in its fat with onion, cilantro and green salsa.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Elote Preparado
+                        </div>
+                        <div class="dish-description">
+                            Cooked corn with mayonnaise, cotija cheese, chili powder and lime in cup.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Elote Preparado', 'Cooked corn with mayonnaise, cotija cheese, chili powder and lime in cup.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Arroz Rojo
+                        </div>
+                        <div class="dish-description">
+                            Rice cooked with tomato, onion, garlic and chicken broth. Traditional side dish.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">220 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Arroz Rojo', 'Rice cooked with tomato, onion, garlic and chicken broth. Traditional side dish.')">
+                            🛒 Add to Order </button>
+                    </div>
+                </div>
+            </div><!-- Cena Sábado -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌙 Dinner</h2><!-- Entradas -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🥗 Appetizers</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Pulpo a las Brasas
+                            </div>
+                            <div class="dish-description">
+                                Pulpo asado con chile ancho, servido con ensalada de nopales y aguacate.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">380 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Pulpo a las Brasas', 'Grilled octopus with ancho chile, served with nopales and avocado salad.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Sopa de Lima
+                            </div>
+                            <div class="dish-description">
+                                Yucatecan broth with shredded chicken, tomato, onion and sour lime.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">250 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Sopa de Lima', 'Yucatecan broth with shredded chicken, tomato, onion and sour lime.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Platos Fuertes -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍖 Main Courses</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card" style="position: relative;">
+                            <div class="special-badge">
+                                👑
+                            </div>
+                            <div class="dish-name">
+                                Cochinita Pibil Especial
+                            </div>
+                            <div class="dish-description">
+                                Cerdo marinado 24 horas en achiote, cocido en horno de tierra con hoja de plátano.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">620 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Cochinita Pibil Especial', 'Pork marinated 24 hours in achiote, cooked in earth oven with banana leaf.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Tamales de Dulce
+                            </div>
+                            <div class="dish-description">
+                                Pink tamales with raisins, pineapple and cinnamon, sweetened masa.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">350 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Tamales de Dulce', 'Pink tamales with raisins, pineapple and cinnamon, sweetened masa.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Pozole Verde
+                            </div>
+                            <div class="dish-description">
+                                Pozole with green pumpkin seed sauce, pork and chicken. With garnishes.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">520 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Pozole Verde', 'Pozole with green pumpkin seed sauce, pork and chicken. With garnishes.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Postres -->
+                <div>
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍰 Desserts</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Jericalla
+                            </div>
+                            <div class="dish-description">
+                                Postre tapatío similar al flan pero con textura más cremosa y canela.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Jericalla', 'Guadalajara dessert similar to flan but with creamier texture and cinnamon.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Dulce de Leche
+                            </div>
+                            <div class="dish-description">
+                                Creamy dessert of milk slowly cooked with sugar and vanilla.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">290 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Dulce de Leche', 'Creamy dessert of milk slowly cooked with sugar and vanilla.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- DOMINGO -->
+        <div class="day-content hidden" data-day="domingo"><!-- Buffet Domingo -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🍽️ Morning Buffet (7:00 AM - 11:00 AM)</h2>
+                <div
+                    style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #f59e0b;">
+                    <h3 style="color: #92400e; font-weight: 700; margin-bottom: 1rem; text-align: center;">ℹ️ Buffet
+                        Information</h3>
+                    <p style="color: #92400e; text-align: center; line-height: 1.6;"><strong>Breakfast is served
+                            with:</strong> Bacon, Sausages, Chilaquiles or Home Made Potatoes<br><strong>You can
+                            choose:</strong> Huevos Rancheros or Eggs Benedict</p>
+                </div>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            ⭐
+                        </div>
+                        <div class="dish-name">
+                            Pozole Blanco
+                        </div>
+                        <div class="dish-description">
+                            Pozole tradicional sin chile, con maíz cacahuazintle, cerdo y pollo. Guarniciones variadas.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">480 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Pozole Blanco', 'Traditional pozole without chile, with hominy corn, pork and chicken. Various garnishes.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            French Toast Mexicano
+                        </div>
+                        <div class="dish-description">
+                            French toast with condensed milk, cinnamon and Mexican red berries.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('French Toast Mexicano', 'French toast with condensed milk, cinnamon and Mexican red berries.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Tortillas de Maíz
+                        </div>
+                        <div class="dish-description">
+                            Handmade tortillas with nixtamalized corn masa, fresh from the comal.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">120 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Tortillas de Maíz', 'Handmade tortillas with nixtamalized corn masa, fresh from the comal.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Cuernitos
+                        </div>
+                        <div class="dish-description">
+                            Sweet bread in horn shape with powdered sugar.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">250 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Cuernitos', 'Sweet bread in horn shape with powdered sugar.')"> 🛒 Add
+                            to Order </button>
+                    </div>
+                </div>
+            </div><!-- Almuerzo Domingo -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌮 Lunch (12:00 PM - 4:00 PM)</h2>
+                <div class="dishes-grid">
+                    <div class="dish-card" style="position: relative;">
+                        <div class="special-badge">
+                            🔥
+                        </div>
+                        <div class="dish-name">
+                            Mole Coloradito
+                        </div>
+                        <div class="dish-description">
+                            Mole oaxaqueño de color rojizo con pollo, servido con arroz amarillo y tortillas.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">580 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Mole Coloradito', 'Oaxacan mole of reddish color with chicken, served with yellow rice and tortillas.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Tacos Dorados
+                        </div>
+                        <div class="dish-description">
+                            Fried tacos filled with potato and chorizo, lettuce, cream, cheese and salsa.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Tacos Dorados', 'Fried tacos filled with potato and chorizo, lettuce, cream, cheese and salsa.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Tlayuda
+                        </div>
+                        <div class="dish-description">
+                            Large toasted tortilla with beans, tasajo, chorizo, avocado and Oaxaca cheese.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">650 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Tlayuda', 'Large toasted tortilla with beans, tasajo, chorizo, avocado and Oaxaca cheese.')">
+                            🛒 Add to Order </button>
+                    </div>
+                    <div class="dish-card">
+                        <div class="dish-name">
+                            Salsa Roja
+                        </div>
+                        <div class="dish-description">
+                            Spicy sauce of guajillo and chipotle chile with roasted tomato, garlic and onion.
+                        </div>
+                        <div class="dish-details"><span class="calorie-badge">35 cal</span>
+                        </div><button class="add-btn"
+                            onclick="addToCart('Salsa Roja', 'Spicy sauce of guajillo and chipotle chile with roasted tomato, garlic and onion.')">
+                            🛒 Add to Order </button>
+                    </div>
+                </div>
+            </div><!-- Cena Domingo -->
+            <div class="meal-section">
+                <h2 class="meal-title font-playfair">🌙 Dinner</h2><!-- Entradas -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🥗 Appetizers</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Pozole Rojo Especial
+                            </div>
+                            <div class="dish-description">
+                                Pozole dominical con carne de cerdo, chile guajillo y todas las guarniciones
+                                tradicionales.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">520 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Pozole Rojo Especial', 'Sunday pozole with pork, guajillo chile and all traditional garnishes.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Enchiladas Suizas
+                            </div>
+                            <div class="dish-description">
+                                Chicken-filled tortillas bathed in green sauce, gratinated with manchego cheese.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">520 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Enchiladas Suizas', 'Chicken-filled tortillas bathed in green sauce, gratinated with manchego cheese.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Platos Fuertes -->
+                <div style="margin-bottom: 2rem;">
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍖 Main Courses</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card" style="position: relative;">
+                            <div class="special-badge">
+                                👑
+                            </div>
+                            <div class="dish-name">
+                                Cabrito en Salsa Verde
+                            </div>
+                            <div class="dish-description">
+                                Cabrito tierno guisado en salsa verde de tomatillo con nopales y quelites.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">720 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Cabrito en Salsa Verde', 'Tender goat stewed in green tomatillo sauce with nopales and quelites.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Chiles en Nogada
+                            </div>
+                            <div class="dish-description">
+                                Patriotic dish with poblano chiles, picadillo, walnut cream and pomegranate.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">580 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Chiles en Nogada', 'Patriotic dish with poblano chiles, picadillo, walnut cream and pomegranate.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Mole Poblano Dominical
+                            </div>
+                            <div class="dish-description">
+                                Special Sunday mole poblano with free-range chicken and fresh tortillas.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">680 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Mole Poblano Dominical', 'Special Sunday mole poblano with free-range chicken and fresh tortillas.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div><!-- Postres -->
+                <div>
+                    <h3
+                        style="font-size: 1.4rem; font-weight: 600; color: #059669; margin-bottom: 1rem; text-align: center;">
+                        🍰 Desserts</h3>
+                    <div class="dishes-grid">
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Capirotada
+                            </div>
+                            <div class="dish-description">
+                                Postre tradicional de Cuaresma con pan, piloncillo, canela, pasas y queso.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">420 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Capirotada', 'Traditional Lenten dessert with bread, piloncillo, cinnamon, raisins and cheese.')">
+                                🛒 Add to Order </button>
+                        </div>
+                        <div class="dish-card">
+                            <div class="dish-name">
+                                Flan de Vainilla
+                            </div>
+                            <div class="dish-description">
+                                Homemade vanilla flan with liquid caramel and seasonal red berries.
+                            </div>
+                            <div class="dish-details"><span class="calorie-badge">320 cal</span>
+                            </div><button class="add-btn"
+                                onclick="addToCart('Flan de Vainilla', 'Homemade vanilla flan with liquid caramel and seasonal red berries.')">
+                                🛒 Add to Order </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="footer">
+            <p class="text-xl font-semibold mb-2" id="footer-text">Chef Franko at Verano Estate</p>
+            <p class="text-sm opacity-60 mt-2">Authentic Mexican cuisine in the heart of Napa Valley</p>
+            <!-- Social Media Links -->
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                <p class="text-sm font-semibold mb-3">Follow us on social media:</p>
+                <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;"><a
+                        href="https://facebook.com/chefrankosalgado" target="_blank" rel="noopener noreferrer"
+                        style="display: flex; align-items: center; gap: 0.5rem; color: #1877f2; text-decoration: none; font-weight: 600; transition: all 0.3s ease; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(24, 119, 242, 0.1);"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(24, 119, 242, 0.3)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                        </svg> Facebook </a> <a href="https://instagram.com/chefrankosalgado" target="_blank"
+                        rel="noopener noreferrer"
+                        style="display: flex; align-items: center; gap: 0.5rem; color: #e4405f; text-decoration: none; font-weight: 600; transition: all 0.3s ease; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(228, 64, 95, 0.1);"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(228, 64, 95, 0.3)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                        </svg> Instagram </a> <a href="https://chefrankosalgado.website" target="_blank"
+                        rel="noopener noreferrer"
+                        style="display: flex; align-items: center; gap: 0.5rem; color: #10b981; text-decoration: none; font-weight: 600; transition: all 0.3s ease; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(16, 185, 129, 0.1);"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 0c-6.627 0-12 5.373-12 12 0 5.975 4.349 10.947 10.059 11.854v-7.385h-2.89v-4.469h2.89v-3.166c0-3.616 1.894-5.314 4.966-5.314 1.381 0 2.563.101 2.911.146v3.374l-1.996.001c-1.566 0-1.87.744-1.87 1.835v2.404h3.737l-.487 4.469h-3.25v7.385c5.71-.907 10.059-5.879 10.059-11.854 0-6.627-5.373-12-12-12z" />
+                        </svg> Website </a>
+                </div>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <p class="text-xs opacity-50">📧 Contact: info@chefrankosalgado.com | 📱 Reservations: (707)
+                        555-0123</p>
+                </div>
+            </div>
+        </footer>
+    </div><!-- Floating Cart Button --> <button class="cart-button" id="cart-btn" onclick="openCart()"> 🛒 <span
+            class="cart-badge hidden" id="cart-badge">0</span> </button> <!-- Cart Modal -->
+    <div class="modal hidden" id="cart-modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 class="text-2xl font-bold">🛒 My Order</h2><button onclick="closeCart()"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+            </div>
+            <div id="cart-items"></div>
+            <div style="border-top: 2px solid #e5e7eb; padding-top: 1rem; margin-top: 1rem;">
+                <p class="text-lg font-semibold mb-3">Total dishes: <span id="total-items">0</span></p>
+                <div style="margin-bottom: 1rem;"><label for="customer-name"
+                        style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Full name:</label> <input
+                        type="text" id="customer-name" placeholder="Your full name"
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;">
+                </div>
+                <div style="margin-bottom: 1rem;"><label for="customer-phone"
+                        style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Phone:</label> <input
+                        type="tel" id="customer-phone" placeholder="Your phone number"
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;">
+                </div>
+                <div style="margin-bottom: 1rem;"><label for="allergies"
+                        style="display: block; font-weight: 600; margin-bottom: 0.5rem;" id="allergies-label">🚨
+                        Allergies or dietary restrictions:</label> <textarea id="allergies"
+                        placeholder="Mention any allergies or dietary restrictions (optional)"
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; min-height: 80px; resize: vertical;"></textarea>
+                </div><button class="whatsapp-btn" onclick="sendToWhatsApp()"> 📱 Send Order via WhatsApp </button>
+                <button onclick="saveOrder()"
+                    style="background: #06b6d4; color: white; border: none; padding: 1rem 2rem; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 0.5rem;">
+                    💾 Save Order </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Default configuration
+        const defaultConfig = {
+            restaurant_name: "Chef Franko at Verano Estate",
+            restaurant_subtitle: "Authentic Mexican Cuisine",
+            footer_text: "Chef Franko at Verano Estate",
+            whatsapp_number: "523221606843"
+        };
+
+        // Cart functionality
+        let cart = [];
+        let orders = [];
+
+        // Data SDK handler
+        const dataHandler = {
+            onDataChanged(data) {
+                orders = data;
+                console.log('Orders updated:', orders.length);
+            }
+        };
+
+        // Initialize Data SDK
+        async function initDataSdk() {
+            if (window.dataSdk) {
+                const result = await window.dataSdk.init(dataHandler);
+                if (!result.isOk) {
+                    console.error('Failed to initialize Data SDK');
+                }
+            }
+        }
+
+        // Add item to cart
+        function addToCart(name, description) {
+            const existingItem = cart.find(item => item.name === name);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: Date.now().toString(),
+                    name: name,
+                    description: description,
+                    quantity: 1
+                });
+            }
+
+            updateCartDisplay();
+            showCartNotification(name);
+        }
+
+        // Remove item from cart
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item.id !== itemId);
+            updateCartDisplay();
+        }
+
+        // Update item quantity
+        function updateQuantity(itemId, change) {
+            const item = cart.find(item => item.id === itemId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(itemId);
+                } else {
+                    updateCartDisplay();
+                }
+            }
+        }
+
+        // Update cart display
+        function updateCartDisplay() {
+            const cartBadge = document.getElementById('cart-badge');
+            const cartItems = document.getElementById('cart-items');
+            const totalItems = document.getElementById('total-items');
+
+            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            if (totalCount > 0) {
+                cartBadge.textContent = totalCount;
+                cartBadge.classList.remove('hidden');
+            } else {
+                cartBadge.classList.add('hidden');
+            }
+
+            totalItems.textContent = totalCount;
+
+            cartItems.innerHTML = '';
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p class="text-gray-500 text-center py-4">Your cart is empty</p>';
+                return;
+            }
+
+            cart.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.style.cssText = 'border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;';
+                itemDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <h4 style="font-weight: 600; color: #1f2937;">${item.name}</h4>
+                        <button onclick="removeFromCart('${item.id}')" style="background: #ef4444; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+                    </div>
+                    <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">${item.description}</p>
+                    <div class="quantity-controls">
+                        <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+                        <span style="padding: 0 1rem; font-weight: 600;">${item.quantity}</span>
+                        <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                    </div>
+                `;
+                cartItems.appendChild(itemDiv);
+            });
+        }
+
+        // Show cart notification
+        function showCartNotification(itemName) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 2rem;
+                right: 2rem;
+                background: #10b981;
+                color: white;
+                padding: 1rem;
+                border-radius: 8px;
+                z-index: 3000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            notification.textContent = `✅ ${itemName} added to order`;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 2000);
+        }
+
+        // Open cart modal
+        function openCart() {
+            document.getElementById('cart-modal').classList.remove('hidden');
+        }
+
+        // Close cart modal
+        function closeCart() {
+            document.getElementById('cart-modal').classList.add('hidden');
+        }
+
+        // Send to WhatsApp
+        function sendToWhatsApp() {
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerPhone = document.getElementById('customer-phone').value.trim();
+            const allergies = document.getElementById('allergies').value.trim();
+
+            if (!customerName || !customerPhone) {
+                showMessage('Please complete your name and phone number', 'error');
+                return;
+            }
+
+            if (cart.length === 0) {
+                showMessage('Your cart is empty', 'error');
+                return;
+            }
+
+            let message = `🍽️ *NEW ORDER - ${defaultConfig.restaurant_name}*\n\n`;
+            message += `👤 *Customer:* ${customerName}\n`;
+            message += `📱 *Phone:* ${customerPhone}\n`;
+            message += `📅 *Selected day:* ${getCurrentDayName()}\n\n`;
+
+            if (allergies) {
+                message += `⚠️ *Allergies/Restrictions:* ${allergies}\n\n`;
+            }
+
+            message += `🍴 *ORDERED DISHES:*\n`;
+            cart.forEach((item, index) => {
+                message += `${index + 1}. *${item.name}* (${item.quantity}x)\n`;
+                message += `   ${item.description}\n\n`;
+            });
+
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            message += `📊 *Total dishes:* ${totalItems}\n\n`;
+            message += `Thank you for your order! 🙏`;
+
+            const whatsappNumber = window.elementSdk?.config?.whatsapp_number || defaultConfig.whatsapp_number;
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+            window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        // Save order to Data SDK
+        async function saveOrder() {
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerPhone = document.getElementById('customer-phone').value.trim();
+            const allergies = document.getElementById('allergies').value.trim();
+
+            if (!customerName || !customerPhone) {
+                showMessage('Please complete your name and phone number', 'error');
+                return;
+            }
+
+            if (cart.length === 0) {
+                showMessage('Your cart is empty', 'error');
+                return;
+            }
+
+            if (orders.length >= 999) {
+                showMessage('Maximum limit of 999 orders reached. Please contact the administrator.', 'error');
+                return;
+            }
+
+            const orderData = {
+                id: Date.now().toString(),
+                customer_name: customerName,
+                phone: customerPhone,
+                allergies: allergies || 'None',
+                items: JSON.stringify(cart),
+                total_items: cart.reduce((sum, item) => sum + item.quantity, 0),
+                order_date: new Date().toISOString(),
+                day_selected: getCurrentDayName()
+            };
+
+            if (window.dataSdk) {
+                const result = await window.dataSdk.create(orderData);
+                if (result.isOk) {
+                    showMessage('Order saved successfully!', 'success');
+                    // Clear cart and form
+                    cart = [];
+                    updateCartDisplay();
+                    document.getElementById('customer-name').value = '';
+                    document.getElementById('customer-phone').value = '';
+                    document.getElementById('allergies').value = '';
+                    closeCart();
+                } else {
+                    showMessage('Error saving order. Please try again.', 'error');
+                }
+            }
+        }
+
+        // Get current day name
+        function getCurrentDayName() {
+            const dayButtons = document.querySelectorAll('.day-btn:not(#language-btn)');
+            const activeButton = document.querySelector('.day-btn.active:not(#language-btn)');
+            return activeButton ? activeButton.textContent : 'Lunes';
+        }
+
+        // Show message
+        function showMessage(text, type) {
+            const message = document.createElement('div');
+            const bgColor = type === 'success' ? '#10b981' : '#ef4444';
+            message.style.cssText = `
+                position: fixed;
+                top: 2rem;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${bgColor};
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 8px;
+                z-index: 3000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                text-align: center;
+                max-width: 90%;
+            `;
+            message.textContent = text;
+
+            document.body.appendChild(message);
+
+            setTimeout(() => {
+                document.body.removeChild(message);
+            }, 3000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            initDataSdk();
+        });
+
+        // Initialize Element SDK
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig: defaultConfig,
+                onConfigChange: async (config) => {
+                    // Update restaurant name
+                    const nameElement = document.getElementById('restaurant-name');
+                    if (nameElement) {
+                        nameElement.textContent = config.restaurant_name || defaultConfig.restaurant_name;
+                    }
+
+                    // Update restaurant subtitle
+                    const subtitleElement = document.getElementById('restaurant-subtitle');
+                    if (subtitleElement) {
+                        subtitleElement.textContent = config.restaurant_subtitle || defaultConfig.restaurant_subtitle;
+                    }
+
+                    // Update footer text
+                    const footerElement = document.getElementById('footer-text');
+                    if (footerElement) {
+                        footerElement.textContent = config.footer_text || defaultConfig.footer_text;
+                    }
+                },
+                mapToCapabilities: (config) => ({
+                    recolorables: [],
+                    borderables: [],
+                    fontEditable: undefined,
+                    fontSizeable: undefined
+                }),
+                mapToEditPanelValues: (config) => new Map([
+                    ["restaurant_name", config.restaurant_name || defaultConfig.restaurant_name],
+                    ["restaurant_subtitle", config.restaurant_subtitle || defaultConfig.restaurant_subtitle],
+                    ["whatsapp_number", config.whatsapp_number || defaultConfig.whatsapp_number],
+                    ["footer_text", config.footer_text || defaultConfig.footer_text]
+                ])
+            });
+        }
+
+        // Language translations
+        const translations = {
+            es: {
+                days: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+                meals: {
+                    breakfast: '🍽️ Buffet Matutino (7:00 AM - 11:00 AM)',
+                    lunch: '🌮 Almuerzo (12:00 PM - 4:00 PM)',
+                    dinner: '🌙 Cena (6:00 PM - 10:00 PM)'
+                },
+                footer: 'Auténtica cocina mexicana en el corazón de Napa Valley',
+                subtitle: 'Auténtica Cocina Mexicana',
+                langBtn: '🇺🇸 Cambiar a Inglés',
+                allergiesLabel: '🚨 Alergias o restricciones alimentarias:',
+                allergiesPlaceholder: 'Menciona cualquier alergia o restricción alimentaria (opcional)',
+                dishes: {
+                    // Jueves
+                    'Migas': 'Fried tortillas mixed with scrambled eggs, serrano chile, tomato and onion. With beans.',
+                    'Tamales Oaxaqueños': 'Tamales wrapped in banana leaf, filled with coloradito mole and chicken.',
+                    'Quelites Guisados': 'Purslane and lamb\'s quarters sautéed with tomato, onion and serrano chile.',
+                    'Empanadas de Dulce': 'Sweet empanadas filled with dulce de leche, dusted with powdered sugar.',
+                    'Birria de Res': 'Beef stewed in red chile sauce, served with onion, cilantro and consommé.',
+                    'Gorditas de Chicharrón': 'Corn masa filled with pressed pork rinds, lettuce, cream and green salsa.',
+                    'Ceviche de Pescado': 'Fresh fish marinated in lime with tomato, onion, cilantro and serrano chile.',
+                    'Frijoles Refritos': 'Pinto beans refried with lard, onion and crumbled fresh cheese.',
+                    'Consomé de Pollo': 'Clear chicken broth with vegetables, chickpeas and rice. Served with lime and chili powder.',
+                    'Camarones al Mojo de Ajo': 'Large shrimp sautéed in olive oil with garlic, guajillo chile and parsley.',
+                    'Mole Negro Oaxaqueño': 'The king of moles with over 30 ingredients, chicken and handmade tortillas.',
+                    'Enchiladas Rojas': 'Tortillas filled with fresh cheese bathed in red guajillo chile sauce with cream and onion.',
+                    'Tacos de Pescado': 'Breaded fish in corn tortillas with cabbage, pico de gallo and chipotle sauce.',
+                    'Buñuelos': 'Crispy fried tortillas bathed in piloncillo honey with cinnamon.',
+                    'Flan de Coco': 'Creamy coconut flan with liquid caramel and toasted shredded coconut.',
+
+                    // Viernes
+                    'Huevos Divorciados': 'Two fried eggs separated by green and red salsa, with refried beans and tortillas.',
+                    'Chilaquiles Verdes': 'Tortillas in green tomatillo sauce with cream, fresh cheese and purple onion.',
+                    'Calabacitas con Elote': 'Tender zucchini sautéed with corn kernels, onion and epazote.',
+                    'Conchas': 'Traditional sweet bread with sugar topping in shell shape.',
+                    'Pescado Zarandeado': 'Whole fish grilled with chile and spice sauce, Nayarit style. With tortillas and salad.',
+                    'Tacos de Pescado': 'Breaded fish in corn tortillas with cabbage, pico de gallo and chipotle sauce.',
+                    'Aguachile Verde': 'Raw shrimp marinated in lime with serrano chile, cucumber and purple onion.',
+                    'Salsa Verde': 'Spicy sauce of roasted tomatillo with serrano chile, garlic and cilantro.',
+                    'Aguachile Rojo': 'Shrimp marinated in lime with chiltepin chile, cucumber, purple onion and avocado.',
+                    'Molcajete de Mariscos': 'Shrimp, octopus and fish in spicy green sauce, served in hot molcajete.',
+                    'Parrillada Mexicana': 'Selection of grilled meats: skirt steak, chorizo, chicken and nopales. With guacamole and tortillas.',
+                    'Quesadillas de Camarón': 'Flour tortillas filled with shrimp, Oaxaca cheese and poblano chile.',
+                    'Tacos de Arrachera': 'Grilled skirt steak with onion, cilantro and red salsa in corn tortillas.',
+                    'Gelatina de Mosaico': 'Colorful dessert of different flavored gelatins with condensed milk.',
+                    'Paletas de Coco': 'Frozen coconut popsicles with fresh coconut pieces and condensed milk.',
+
+                    // Sábado
+                    'Menudo Rojo': 'Traditional beef tripe soup with red chile, served with onion, oregano and lime.',
+                    'Pancakes de Cajeta': 'Fluffy pancakes bathed in homemade cajeta with walnuts and banana.',
+                    'Chiles Toreados': 'Roasted jalapeño chiles with onion, garlic and coarse salt.',
+                    'Orejas': 'Sweet bread in ear shape with sugar and cinnamon.',
+                    'Cabrito al Pastor': 'Young goat roasted northern style with spices and aromatic herbs.',
+                    'Tacos de Suadero': 'Suadero meat golden in its fat with onion, cilantro and green salsa.',
+                    'Elote Preparado': 'Cooked corn with mayonnaise, cotija cheese, chili powder and lime in cup.',
+                    'Arroz Rojo': 'Rice cooked with tomato, onion, garlic and chicken broth. Traditional side dish.',
+                    'Pulpo a las Brasas': 'Grilled octopus with ancho chile, served with nopales and avocado salad.',
+                    'Sopa de Lima': 'Yucatecan broth with shredded chicken, tomato, onion and sour lime.',
+                    'Cochinita Pibil Especial': 'Pork marinated 24 hours in achiote, cooked in earth oven with banana leaf.',
+                    'Tamales de Dulce': 'Pink tamales with raisins, pineapple and cinnamon, sweetened masa.',
+                    'Pozole Verde': 'Pozole with green pumpkin seed sauce, pork and chicken. With garnishes.',
+                    'Jericalla': 'Guadalajara dessert similar to flan but with creamier texture and cinnamon.',
+                    'Dulce de Leche': 'Creamy dessert of milk slowly cooked with sugar and vanilla.',
+
+                    // Domingo
+                    'Pozole Blanco': 'Traditional pozole without chile, with hominy corn, pork and chicken. Various garnishes.',
+                    'French Toast Mexicano': 'French toast with condensed milk, cinnamon and Mexican red berries.',
+                    'Tortillas de Maíz': 'Handmade tortillas with nixtamalized corn masa, fresh from the comal.',
+                    'Cuernitos': 'Sweet bread in horn shape with powdered sugar.',
+                    'Mole Coloradito': 'Oaxacan mole of reddish color with chicken, served with yellow rice and tortillas.',
+                    'Tacos Dorados': 'Fried tacos filled with potato and chorizo, lettuce, cream, cheese and salsa.',
+                    'Tlayuda': 'Large toasted tortilla with beans, tasajo, chorizo, avocado and Oaxaca cheese.',
+                    'Salsa Roja': 'Spicy sauce of guajillo and chipotle chile with roasted tomato, garlic and onion.',
+                    'Pozole Rojo Especial': 'Sunday pozole with pork, guajillo chile and all traditional garnishes.',
+                    'Enchiladas Suizas': 'Chicken-filled tortillas bathed in green sauce, gratinated with manchego cheese.',
+                    'Cabrito en Salsa Verde': 'Tender goat stewed in green tomatillo sauce with nopales and quelites.',
+                    'Chiles en Nogada': 'Patriotic dish with poblano chiles, picadillo, walnut cream and pomegranate.',
+                    'Mole Poblano Dominical': 'Special Sunday mole poblano with free-range chicken and fresh tortillas.',
+                    'Capirotada': 'Traditional Lenten dessert with bread, piloncillo, cinnamon, raisins and cheese.',
+                    'Flan de Vainilla': 'Homemade vanilla flan with liquid caramel and seasonal red berries.'
+                }
+            },
+            en: {
+                days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                meals: {
+                    breakfast: '🍽️ Morning Buffet (7:00 AM - 11:00 AM)',
+                    lunch: '🌮 Lunch (12:00 PM - 4:00 PM)',
+                    dinner: '🌙 Dinner (6:00 PM - 10:00 PM)'
+                },
+                footer: 'Authentic Mexican cuisine in the heart of Napa Valley',
+                subtitle: 'Authentic Mexican Cuisine',
+                langBtn: '🇪🇸 Switch to Spanish',
+                allergiesLabel: '🚨 Allergies or dietary restrictions:',
+                allergiesPlaceholder: 'Mention any allergies or dietary restrictions (optional)',
+                dishes: {
+                    // Jueves
+                    'Migas': 'Tortillas fritas mezcladas con huevos revueltos, chile serrano, jitomate y cebolla. Con frijoles.',
+                    'Tamales Oaxaqueños': 'Tamales envueltos en hoja de plátano, rellenos de mole coloradito con pollo.',
+                    'Quelites Guisados': 'Verdolagas y quintoniles salteados con jitomate, cebolla y chile serrano.',
+                    'Empanadas de Dulce': 'Empanadas rellenas de dulce de leche, espolvoreadas con azúcar glass.',
+                    'Birria de Res': 'Carne de res guisada en salsa de chiles rojos, servida con cebolla, cilantro y consomé.',
+                    'Gorditas de Chicharrón': 'Masa de maíz rellena de chicharrón prensado, lechuga, crema y salsa verde.',
+                    'Ceviche de Pescado': 'Pescado fresco marinado en limón con jitomate, cebolla, cilantro y chile serrano.',
+                    'Frijoles Refritos': 'Frijoles bayos refritos con manteca, cebolla y queso fresco desmoronado.',
+                    'Consomé de Pollo': 'Caldo claro de pollo con verduras, garbanzos y arroz. Servido con limón y chile piquín.',
+                    'Camarones al Mojo de Ajo': 'Camarones grandes salteados en aceite de oliva con ajo, chile guajillo y perejil.',
+                    'Mole Negro Oaxaqueño': 'El rey de los moles con más de 30 ingredientes, pollo y tortillas hechas a mano.',
+                    'Enchiladas Rojas': 'Tortillas rellenas de queso fresco bañadas en salsa roja de chile guajillo con crema y cebolla.',
+                    'Tacos de Pescado': 'Pescado empanizado en tortillas de maíz con repollo, pico de gallo y salsa de chipotle.',
+                    'Buñuelos': 'Tortillas fritas crujientes bañadas en miel de piloncillo con canela.',
+                    'Flan de Coco': 'Flan cremoso de coco con caramelo líquido y coco rallado tostado.',
+
+                    // Viernes
+                    'Huevos Divorciados': 'Dos huevos estrellados separados por salsa verde y roja, con frijoles refritos y tortillas.',
+                    'Chilaquiles Verdes': 'Tortillas en salsa verde de tomatillo con crema, queso fresco y cebolla morada.',
+                    'Calabacitas con Elote': 'Calabacitas tiernas salteadas con granos de elote, cebolla y epazote.',
+                    'Conchas': 'Pan dulce tradicional con cobertura de azúcar en forma de concha.',
+                    'Pescado Zarandeado': 'Pescado entero asado con salsa de chiles y especias, estilo Nayarit. Con tortillas y ensalada.',
+                    'Tacos de Pescado': 'Pescado empanizado en tortillas de maíz con repollo, pico de gallo y salsa de chipotle.',
+                    'Aguachile Verde': 'Camarones crudos marinados en limón con chile serrano, pepino y cebolla morada.',
+                    'Salsa Verde': 'Salsa picante de tomatillo asado con chile serrano, ajo y cilantro.',
+                    'Aguachile Rojo': 'Camarones marinados en limón con chile chiltepin, pepino, cebolla morada y aguacate.',
+                    'Molcajete de Mariscos': 'Camarones, pulpo y pescado en salsa verde picante, servido en molcajete caliente.',
+                    'Parrillada Mexicana': 'Selección de carnes asadas: arrachera, chorizo, pollo y nopales. Con guacamole y tortillas.',
+                    'Quesadillas de Camarón': 'Tortillas de harina rellenas de camarones, queso Oaxaca y chile poblano.',
+                    'Tacos de Arrachera': 'Carne de arrachera asada con cebolla, cilantro y salsa roja en tortillas de maíz.',
+                    'Gelatina de Mosaico': 'Postre colorido de gelatinas de diferentes sabores con leche condensada.',
+                    'Paletas de Coco': 'Paletas heladas de coco natural con trozos de coco fresco y leche condensada.',
+
+                    // Sábado
+                    'Menudo Rojo': 'Sopa tradicional de pancita de res con chile rojo, servida con cebolla, orégano y limón.',
+                    'Pancakes de Cajeta': 'Hotcakes esponjosos bañados en cajeta casera con nueces y plátano.',
+                    'Chiles Toreados': 'Chiles jalapeños asados con cebolla, ajo y sal de grano.',
+                    'Orejas': 'Pan dulce en forma de oreja con azúcar y canela.',
+                    'Cabrito al Pastor': 'Cabrito joven asado al estilo norteño con especias y hierbas aromáticas.',
+                    'Tacos de Suadero': 'Carne de suadero dorada en su grasa con cebolla, cilantro y salsa verde.',
+                    'Elote Preparado': 'Elote cocido con mayonesa, queso cotija, chile piquín y limón en vaso.',
+                    'Arroz Rojo': 'Arroz cocido con jitomate, cebolla, ajo y caldo de pollo. Guarnición tradicional.',
+                    'Pulpo a las Brasas': 'Pulpo asado con chile ancho, servido con ensalada de nopales y aguacate.',
+                    'Sopa de Lima': 'Caldo yucateco con pollo deshebrado, jitomate, cebolla y lima agria.',
+                    'Cochinita Pibil Especial': 'Cerdo marinado 24 horas en achiote, cocido en horno de tierra con hoja de plátano.',
+                    'Tamales de Dulce': 'Tamales rosa con pasas, piña y canela, masa endulzada con azúcar.',
+                    'Pozole Verde': 'Pozole con salsa verde de pepitas de calabaza, cerdo y pollo. Con guarniciones.',
+                    'Jericalla': 'Postre tapatío similar al flan pero con textura más cremosa y canela.',
+                    'Dulce de Leche': 'Postre cremoso de leche cocida lentamente con azúcar y vainilla.',
+
+                    // Domingo
+                    'Pozole Blanco': 'Pozole tradicional sin chile, con maíz cacahuazintle, cerdo y pollo. Guarniciones variadas.',
+                    'French Toast Mexicano': 'Pan francés con leche condensada, canela y frutos rojos mexicanos.',
+                    'Tortillas de Maíz': 'Tortillas hechas a mano con masa de maíz nixtamalizado, recién salidas del comal.',
+                    'Cuernitos': 'Pan dulce en forma de cuerno con azúcar glass.',
+                    'Mole Coloradito': 'Mole oaxaqueño de color rojizo con pollo, servido con arroz amarillo y tortillas.',
+                    'Tacos Dorados': 'Tacos fritos rellenos de papa con chorizo, lechuga, crema, queso y salsa.',
+                    'Tlayuda': 'Tortilla grande tostada con frijoles, tasajo, chorizo, aguacate y queso Oaxaca.',
+                    'Salsa Roja': 'Salsa picante de chile guajillo y chipotle con jitomate, ajo y cebolla asados.',
+                    'Pozole Rojo Especial': 'Pozole dominical con carne de cerdo, chile guajillo y todas las guarniciones tradicionales.',
+                    'Enchiladas Suizas': 'Tortillas rellenas de pollo bañadas en salsa verde, gratinadas con queso manchego.',
+                    'Cabrito en Salsa Verde': 'Cabrito tierno guisado en salsa verde de tomatillo con nopales y quelites.',
+                    'Chiles en Nogada': 'Platillo patrio con chiles poblanos, picadillo, nogada y granada.',
+                    'Mole Poblano Dominical': 'Mole poblano especial de domingo con pollo de rancho y tortillas recién hechas.',
+                    'Capirotada': 'Postre tradicional de Cuaresma con pan, piloncillo, canela, pasas y queso.',
+                    'Flan de Vainilla': 'Flan casero de vainilla con caramelo líquido y frutos rojos de temporada.'
+                }
+            }
+        };
+
+        let currentLanguage = 'en';
+
+        // Language toggle functionality
+        document.getElementById('language-btn').addEventListener('click', function () {
+            currentLanguage = currentLanguage === 'es' ? 'en' : 'es';
+            updateLanguage();
+        });
+
+        function updateLanguage() {
+            const lang = translations[currentLanguage];
+
+            // Update language button
+            document.getElementById('language-btn').textContent = lang.langBtn;
+
+            // Update day buttons
+            const dayButtons = document.querySelectorAll('.day-btn:not(#language-btn)');
+            dayButtons.forEach((btn, index) => {
+                btn.textContent = lang.days[index];
+            });
+
+            // Update meal titles
+            document.querySelectorAll('.meal-title').forEach(title => {
+                const text = title.textContent;
+                if (text.includes('Buffet Matutino') || text.includes('Morning Buffet')) {
+                    title.textContent = lang.meals.breakfast;
+                } else if (text.includes('Almuerzo') || text.includes('Lunch')) {
+                    title.textContent = lang.meals.lunch;
+                } else if (text.includes('Cena') || text.includes('Dinner')) {
+                    title.textContent = lang.meals.dinner;
+                }
+            });
+
+            // Update dish names and descriptions
+            document.querySelectorAll('.dish-name').forEach(dishName => {
+                const originalName = dishName.textContent;
+                if (lang.dishes[originalName]) {
+                    const dishCard = dishName.closest('.dish-card');
+                    const description = dishCard.querySelector('.dish-description');
+                    if (description) {
+                        if (currentLanguage === 'es') {
+                            // Switch to Spanish - dish name stays the same, description changes to Spanish
+                            description.textContent = lang.dishes[originalName];
+                        } else {
+                            // Switch to English - description changes to English
+                            description.textContent = lang.dishes[originalName];
+                        }
+                    }
+                }
+            });
+
+            // Update subtitle
+            const subtitleElement = document.getElementById('restaurant-subtitle');
+            if (subtitleElement) {
+                subtitleElement.textContent = lang.subtitle;
+            }
+
+            // Update footer
+            const footerTexts = document.querySelectorAll('.footer p');
+            if (footerTexts.length > 1) {
+                footerTexts[1].textContent = lang.footer;
+            }
+
+            // Update allergies label and placeholder
+            const allergiesLabel = document.getElementById('allergies-label');
+            if (allergiesLabel) {
+                allergiesLabel.textContent = lang.allergiesLabel;
+            }
+
+            const allergiesTextarea = document.getElementById('allergies');
+            if (allergiesTextarea) {
+                allergiesTextarea.placeholder = lang.allergiesPlaceholder;
+            }
+        }
+
+        // Day navigation functionality
+        let currentDay = 'lunes';
+
+        document.querySelectorAll('.day-btn:not(#language-btn)').forEach(btn => {
+            btn.addEventListener('click', function () {
+                // Remove active class from all day buttons
+                document.querySelectorAll('.day-btn:not(#language-btn)').forEach(b => b.classList.remove('active'));
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Hide all day content
+                document.querySelectorAll('.day-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                // Show selected day content
+                const selectedDay = this.dataset.day;
+                const dayContent = document.querySelector(`.day-content[data-day="${selectedDay}"]`);
+                if (dayContent) {
+                    dayContent.classList.remove('hidden');
+                }
+
+                currentDay = selectedDay;
+            });
+        });
+
+        // Add smooth scrolling for better UX
+        document.querySelectorAll('.day-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }, 100);
+            });
+        });
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9957bd5b36340c43',t:'MTc2MTYyNjI2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>
